@@ -2,6 +2,13 @@
   "name": "@diglit/quantum-ai-platform",
   "version": "1.0.0-alpha.1",
   "description": "Quantum-inspired AI platform for creative generation and multimodal content synthesis",
+  "type": "module",
+  "packageManager": "npm@10.2.4",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=10.0.0",
+    "python": ">=3.9.0"
+  },
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:web": "cd modules/frontend/apps/web/diglit-web && npm run dev",
@@ -11,11 +18,13 @@
     "build": "turbo run build",
     "build:prod": "turbo run build:prod",
     "build:analyze": "turbo run build:analyze",
+    "build:all": "npx turbo run build",
     "test": "turbo run test",
     "test:frontend": "turbo run test --filter=./modules/frontend/*",
     "test:backend": "cd modules/backend && python -m pytest",
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "playwright test",
+    "test:types": "turbo run type-check",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "turbo run format",
@@ -26,21 +35,37 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up",
     "db:migrate": "cd modules/backend && python -m alembic upgrade head",
     "db:generate": "cd modules/backend && python -m alembic revision --autogenerate",
     "db:reset": "cd modules/backend && python -m alembic downgrade base && python -m alembic upgrade head",
+    "db:seed": "cd modules/backend && python -m scripts.seed_data",
     "storybook": "turbo run storybook",
     "storybook:build": "turbo run storybook:build",
     "clean": "turbo run clean && rimraf node_modules/.cache",
     "clean:all": "npm run clean && rimraf node_modules **/node_modules",
+    "clean:cache": "turbo run clean && rimraf **/.turbo **/.next **/dist",
+    "security:audit": "npm audit --audit-level high",
+    "security:fix": "npm audit fix",
+    "security:ci": "npm ci --audit",
+    "workspace:frontend": "turbo run dev --filter=./modules/frontend/*",
+    "workspace:backend": "turbo run dev --filter=./modules/backend/*",
+    "workspace:ai": "turbo run dev --filter=./modules/ai-engine/*",
+    "workspace:install": "turbo run install --parallel",
+    "workspace:update": "turbo run update --parallel",
+    "workspace:outdated": "turbo run outdated --parallel",
+    "bundle:analyze": "turbo run build:analyze",
+    "bundle:size": "size-limit",
+    "bundle:size:ci": "size-limit --ci",
+    "bundle:why": "turbo run build --dry-run=json",
+    "quantum:simulate": "cd modules/ai-engine && python -m quantum.simulator",
+    "quantum:train": "cd modules/ai-engine && python -m quantum.training",
+    "quantum:api": "cd modules/ai-engine && python -m uvicorn quantum.api:app --reload --port 8001",
     "claude:tasks": "bash .claude/commands.sh tasks",
     "claude:progress": "bash .claude/commands.sh progress",
     "claude:structure": "bash .claude/commands.sh structure",
-    "prepare": "husky install",
-    "pre-commit": "lint-staged",
-    "release": "standard-version",
-    "release:minor": "standard-version --release-as minor",
-    "release:major": "standard-version --release-as major",
+    "claude:prepare": "bash scripts/development/auto-fix.sh --claude",
+    "claude:fix": "bash scripts/development/claude-fix-apply.sh",
     "fix:auto": "bash scripts/development/auto-fix.sh",
     "fix:frontend": "bash scripts/development/fix-frontend.sh",
     "fix:backend": "bash scripts/development/fix-backend.sh",
@@ -48,26 +73,48 @@
     "validate": "bash scripts/development/deep-audit.sh",
     "validate:frontend": "cd modules/frontend && npx tsc --noEmit && npx eslint . --quiet",
     "validate:backend": "cd modules/backend && python -m py_compile apps/api/main.py",
-    "claude:prepare": "bash scripts/development/auto-fix.sh --claude",
-    "claude:fix": "bash scripts/development/claude-fix-apply.sh",
     "audit:full": "bash scripts/development/auto-fix.sh",
     "audit:claude": "bash scripts/development/audit-and-fix.sh --claude",
     "audit:report": "cat .claude/audit/audit-report.md",
     "deploy:check": "bash scripts/development/auto-fix.sh && bash scripts/development/deep-audit.sh && npx turbo run build",
-    "build:all": "npx turbo run build",
+    "deploy:preview": "npm run build:prod && npm run test && npm run bundle:size",
     "structure:analyze": "bash scripts/development/cleanup-structure.sh",
     "structure:cleanup": "bash scripts/development/cleanup-structure.sh",
-    "structure:report": "cat .claude/structure-report.md"
+    "structure:report": "cat .claude/structure-report.md",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:alpha": "standard-version --prerelease alpha",
+    "ci:test": "npm run test:coverage && npm run build && npm run bundle:size:ci",
+    "ci:security": "npm audit --audit-level moderate && npm run type-check",
+    "ci:full": "npm run ci:security && npm run ci:test"
   },
   "dependencies": {
-    "next": "14.2.33"
+    "next": "14.2.33",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "quantum-utils": "^1.0.0",
+    "qiskit": "^0.44.0",
+    "cirq": "^1.3.0",
+    "pennylane": "^0.32.0",
+    "tensorflow-quantum": "^0.7.2",
+    "quantum-machine-learning": "^0.5.0",
+    "quantum-neural-networks": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@playwright/test": "^1.40.0",
+    "@size-limit/preset-app": "^8.1.0",
+    "size-limit": "^8.1.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.45.0",
+    "eslint-config-next": "^14.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-jsx-a11y": "^6.7.1",
@@ -80,16 +127,64 @@
     "standard-version": "^9.5.0",
     "turbo": "^1.13.4",
     "typescript": "^5.1.0"
-  }
-}
-{
-  "name": "@diglit/quantum-ai-platform",
-  "version": "1.0.0-alpha.1",
-  "scripts": {
-    // your existing scripts...
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["eslint --fix"],
-    "*.{json,md,css,html}": ["prettier --write"]
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "black --quiet",
+      "isort --quiet"
+    ]
+  },
+  "size-limit": [
+    {
+      "path": "modules/frontend/apps/web/diglit-web/.next/static/chunks/*.js",
+      "limit": "250 kB"
+    },
+    {
+      "path": "modules/frontend/apps/admin/.next/static/chunks/*.js",
+      "limit": "200 kB"
+    },
+    {
+      "path": "modules/frontend/packages/ui/dist/**/*.js",
+      "limit": "100 kB"
+    }
+  ],
+  "keywords": [
+    "quantum",
+    "ai",
+    "machine-learning",
+    "quantum-computing",
+    "qiskit",
+    "cirq",
+    "pennylane",
+    "creative-generation",
+    "multimodal",
+    "nextjs",
+    "typescript",
+    "python"
+  ],
+  "author": {
+    "name": "DigLit Team",
+    "email": "thelawofattraction313@gmail.com",
+    "url": "https://github.com/Z-313/Dig-lit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Z-313/Dig-lit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Z-313/Dig-lit/issues"
+  },
+  "homepage": "https://github.com/Z-313/Dig-lit#readme",
+  "license": "MIT",
+  "volta": {
+    "node": "18.17.0",
+    "npm": "10.2.4"
   }
 }
