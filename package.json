@@ -82,3 +82,14 @@
     "typescript": "^5.1.0"
   }
 }
+{
+  "name": "@diglit/quantum-ai-platform",
+  "version": "1.0.0-alpha.1",
+  "scripts": {
+    // your existing scripts...
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": ["eslint --fix"],
+    "*.{json,md,css,html}": ["prettier --write"]
+  }
+}
