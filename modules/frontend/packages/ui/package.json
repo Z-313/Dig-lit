@@ -1,0 +1,19 @@
+{
+  "name": "@diglit/ui",
+  "version": "1.0.0",
+  "description": null,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "@diglit/design-system": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.1.0",
+    "eslint": "^8.45.0"
+  }
+}

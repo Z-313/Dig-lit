@@ -1,0 +1,27 @@
+{
+  "name": "@diglit/design-system",
+  "version": "1.0.0",
+  "description": null,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "storybook": "storybook dev -p 6007",
+    "storybook:build": "storybook build"
+  },
+  "dependencies": {
+    "clsx": "^2.0.0",
+    "lint-staged": "16.2.3",
+    "next": "14.2.33",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/react": "^9.1.10",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.45.0",
+    "typescript": "^5.1.0"
+  }
+}

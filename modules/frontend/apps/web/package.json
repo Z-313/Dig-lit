@@ -1,0 +1,12 @@
+{
+  "name": "@diglit/web-apps",
+  "version": "1.0.0",
+  "description": null,
+  "scripts": {
+    "dev": "npm run dev --workspace=diglit-web",
+    "build": "npm run build --workspace=diglit-web",
+    "lint": "npm run lint --workspaces"
+  },
+  "dependencies": null,
+  "devDependencies": null
+}
