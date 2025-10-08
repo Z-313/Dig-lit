@@ -3,7 +3,6 @@
 ├── README.md
 ├── docker-compose.dev.yml
 ├── docker-compose.yml
-├── full_project_tree.txt
 ├── modules
 │   ├── ai-engine
 │   │   ├── core
@@ -41792,4 +41791,4 @@
 ├── tsconfig.tsbuildinfo
 └── turbo.json
 
-5615 directories, 36178 files
+5615 directories, 36177 files
