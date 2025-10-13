@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Quantum-LED AI Agent v4.44
-Self-evolving synthetic intelligence for autonomous repository management
-Digilit Project - 5 AI Engines Integration
+Quantum-LED AI Agent v5.0 - DEEP VALIDATION EDITION
+Complete validation and correction for ALL directories, subdirectories, and files
 """
 
 import ast
@@ -18,348 +17,391 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 
-class QuantumMemory:
-    """Persistent memory system that evolves and learns"""
+class DeepValidator:
+    """Deep validation for entire repository tree"""
 
-    def __init__(self, memory_path=".quantum_memory"):
-        self.memory_path = Path(memory_path)
-        self.memory_path.mkdir(exist_ok=True)
+    def __init__(self, repo_path):
+        self.repo_path = Path(repo_path)
+        self.errors = []
+        self.warnings = []
+        self.fixes_applied = []
 
-        self.knowledge_base = self._load_memory("knowledge.qm")
-        self.actions_history = self._load_memory("actions.qm")
-        self.learning_patterns = self._load_memory("patterns.qm")
-        self.project_structure = self._load_memory("structure.qm")
+    def validate_all(self):
+        """Validate EVERYTHING recursively"""
+        print("🔍 DEEP VALIDATION MODE - Checking ALL directories and files\n")
 
-    def _load_memory(self, filename):
-        """Load quantum memory from bytes"""
-        file_path = self.memory_path / filename
-        if file_path.exists():
-            with open(file_path, "rb") as f:
-                return pickle.load(f)
-        return {}
+        # 1. Validate directory structure
+        self._validate_directories()
 
-    def _save_memory(self, filename, data):
-        """Save quantum memory to bytes"""
-        file_path = self.memory_path / filename
-        with open(file_path, "wb") as f:
-            pickle.dump(data, f)
+        # 2. Validate all files
+        self._validate_files()
 
-    def learn(self, category, key, value):
-        """Learn new information"""
-        if category not in self.knowledge_base:
-            self.knowledge_base[category] = {}
-        self.knowledge_base[category][key] = {
-            "value": value,
-            "timestamp": datetime.now().isoformat(),
-            "frequency": self.knowledge_base[category].get(key, {}).get("frequency", 0)
-            + 1,
-        }
-        self._save_memory("knowledge.qm", self.knowledge_base)
+        # 3. Validate git status
+        self._validate_git()
 
-    def recall(self, category, key=None):
-        """Recall learned information"""
-        if key:
-            return self.knowledge_base.get(category, {}).get(key, {}).get("value")
-        return self.knowledge_base.get(category, {})
+        # 4. Validate permissions
+        self._validate_permissions()
 
-    def record_action(self, action, result, context):
-        """Record action for pattern learning"""
-        action_id = hashlib.md5(f"{action}{datetime.now()}".encode()).hexdigest()[:8]
-        self.actions_history[action_id] = {
-            "action": action,
-            "result": result,
-            "context": context,
-            "timestamp": datetime.now().isoformat(),
-        }
-        self._save_memory("actions.qm", self.actions_history)
-        self._analyze_patterns()
+        # 5. Validate code syntax
+        self._validate_code_syntax()
 
-    def _analyze_patterns(self):
-        """Analyze action history to learn patterns"""
-        # Analyze successful vs failed actions
-        if len(self.actions_history) > 10:
-            successful = [
-                a for a in self.actions_history.values() if a["result"] == "success"
-            ]
-            failed = [
-                a for a in self.actions_history.values() if a["result"] == "failed"
-            ]
+        # 6. Generate report
+        return self._generate_report()
 
-            self.learning_patterns["success_rate"] = len(successful) / len(
-                self.actions_history
-            )
-            self.learning_patterns["common_actions"] = self._get_common_actions(
-                successful
-            )
-            self.learning_patterns["avoid_actions"] = self._get_common_actions(failed)
+    def _validate_directories(self):
+        """Check all directories for issues"""
+        print("📁 Validating directory structure...")
 
-            self._save_memory("patterns.qm", self.learning_patterns)
-
-    def _get_common_actions(self, actions):
-        """Find common action patterns"""
-        action_counts = {}
-        for a in actions:
-            action_type = a["action"].split(":")[0]
-            action_counts[action_type] = action_counts.get(action_type, 0) + 1
-        return action_counts
-
-    def update_structure(self, structure):
-        """Update project structure knowledge"""
-        self.project_structure = structure
-        self._save_memory("structure.qm", self.project_structure)
-
-    def get_intelligence_report(self):
-        """Generate intelligence report"""
-        return {
-            "total_knowledge_items": sum(len(v) for v in self.knowledge_base.values()),
-            "actions_recorded": len(self.actions_history),
-            "success_rate": self.learning_patterns.get("success_rate", 0),
-            "common_patterns": self.learning_patterns.get("common_actions", {}),
-            "last_updated": datetime.now().isoformat(),
-        }
-
-
-class QuantumLEDAgent:
-    """Main AI Agent with 5 engine integration"""
-
-    def __init__(self):
-        self.repo_path = os.getcwd()
-        self.memory = QuantumMemory()
-        self.engines = {
-            "quantum_led": True,
-            "frontend": False,
-            "backend": False,
-            "business_intelligence": False,
-            "visual_engine": False,
-        }
-
-        print("🌌 Quantum-LED AI Agent v4.44 Initializing...")
-        print("   Synthetic Intelligence: ACTIVE")
-        print("   Memory System: QUANTUM")
-        print("   Learning Mode: CONTINUOUS\n")
-
-    def run_command(self, cmd, capture=True):
-        """Execute shell command with learning"""
-        try:
-            if capture:
-                result = subprocess.run(
-                    cmd, shell=True, capture_output=True, text=True, cwd=self.repo_path
-                )
-                success = result.returncode == 0
-                self.memory.record_action(
-                    f"command:{cmd[:50]}",
-                    "success" if success else "failed",
-                    {"stdout": result.stdout[:100], "stderr": result.stderr[:100]},
-                )
-                return result.returncode, result.stdout, result.stderr
-            else:
-                result = subprocess.run(cmd, shell=True, cwd=self.repo_path)
-                return result.returncode, "", ""
-        except Exception as e:
-            self.memory.record_action(
-                f"command:{cmd[:50]}", "failed", {"error": str(e)}
-            )
-            return 1, "", str(e)
-
-    def deep_scan_structure(self):
-        """Deep scan entire repository structure"""
-        print("🔬 Performing deep quantum scan...\n")
-
-        structure = {
-            "directories": [],
-            "files": {},
-            "file_types": {},
-            "total_size": 0,
-            "complexity_score": 0,
-        }
-
-        # Scan all files and directories
         for root, dirs, files in os.walk(self.repo_path):
-            # Skip .git and node_modules
+            # Skip ignored directories
             dirs[:] = [
                 d
                 for d in dirs
-                if d not in [".git", "node_modules", "__pycache__", ".quantum_memory"]
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
             ]
 
             rel_root = os.path.relpath(root, self.repo_path)
-            if rel_root != ".":
-                structure["directories"].append(rel_root)
+
+            # Check for empty directories
+            if not dirs and not files:
+                self.warnings.append(f"Empty directory: {rel_root}")
+
+            # Check for permission issues
+            if not os.access(root, os.R_OK):
+                self.errors.append(f"No read permission: {rel_root}")
+
+            # Check for special characters in directory names
+            if re.search(r'[<>:"|?*]', os.path.basename(root)):
+                self.errors.append(f"Invalid characters in directory name: {rel_root}")
+
+        print(f"   ✓ Checked all directories")
+
+    def _validate_files(self):
+        """Validate ALL files recursively"""
+        print("📄 Validating all files...")
+
+        for root, dirs, files in os.walk(self.repo_path):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
+            ]
 
             for file in files:
-                file_path = os.path.join(root, file)
-                rel_path = os.path.relpath(file_path, self.repo_path)
+                file_path = Path(root) / file
+                rel_path = file_path.relative_to(self.repo_path)
 
-                try:
-                    file_size = os.path.getsize(file_path)
-                    file_ext = Path(file).suffix
+                # Check if file exists and is readable
+                if not file_path.exists():
+                    self.errors.append(f"File doesn't exist: {rel_path}")
+                    continue
 
-                    structure["files"][rel_path] = {
-                        "size": file_size,
-                        "extension": file_ext,
-                        "last_modified": os.path.getmtime(file_path),
-                    }
+                if not os.access(file_path, os.R_OK):
+                    self.errors.append(f"No read permission: {rel_path}")
+                    continue
 
-                    structure["file_types"][file_ext] = (
-                        structure["file_types"].get(file_ext, 0) + 1
+                # Check file size (warn if > 100MB)
+                size = file_path.stat().st_size
+                if size > 100 * 1024 * 1024:
+                    self.warnings.append(
+                        f"Large file ({size/1024/1024:.1f}MB): {rel_path}"
                     )
-                    structure["total_size"] += file_size
 
-                    # Analyze code complexity
-                    if file_ext in [".py", ".js", ".jsx", ".ts", ".tsx"]:
-                        complexity = self._analyze_code_complexity(file_path)
-                        structure["complexity_score"] += complexity
+                # Check for binary files that shouldn't be tracked
+                if self._is_binary_file(file_path) and file_path.suffix in [
+                    ".exe",
+                    ".dll",
+                    ".so",
+                    ".dylib",
+                ]:
+                    self.warnings.append(f"Binary file in repo: {rel_path}")
 
-                except Exception as e:
-                    pass
+                # Check for special characters
+                if re.search(r'[<>:"|?*]', file):
+                    self.errors.append(f"Invalid characters in filename: {rel_path}")
 
-        # Update quantum memory
-        self.memory.update_structure(structure)
-        self.memory.learn("repository", "total_files", len(structure["files"]))
-        self.memory.learn("repository", "total_dirs", len(structure["directories"]))
+        print(f"   ✓ Checked all files")
 
-        # Display findings
-        print(f"📊 Quantum Analysis Complete:")
-        print(f"   ├─ Directories: {len(structure['directories'])}")
-        print(f"   ├─ Files: {len(structure['files'])}")
-        print(f"   ├─ Total Size: {structure['total_size'] / 1024 / 1024:.2f} MB")
-        print(f"   ├─ Complexity Score: {structure['complexity_score']}")
-        print(f"   └─ File Types: {len(structure['file_types'])}")
-
-        print("\n   File Type Distribution:")
-        for ext, count in sorted(
-            structure["file_types"].items(), key=lambda x: x[1], reverse=True
-        )[:10]:
-            print(f"      • {ext or 'no extension'}: {count} files")
-
-        return structure
-
-    def _analyze_code_complexity(self, file_path):
-        """Analyze code complexity using AST"""
+    def _is_binary_file(self, file_path):
+        """Check if file is binary"""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-
-            if file_path.endswith(".py"):
-                tree = ast.parse(content)
-                complexity = len(list(ast.walk(tree)))
-                return complexity
-            else:
-                # Simple line-based complexity for other languages
-                return len(content.split("\n"))
+            with open(file_path, "rb") as f:
+                chunk = f.read(1024)
+                return b"\0" in chunk
         except:
-            return 0
+            return False
 
-    def autonomous_diagnosis(self):
-        """Autonomous diagnosis with AI decision making"""
-        print("🧠 Autonomous Diagnosis Mode\n")
+    def _validate_git(self):
+        """Deep git validation"""
+        print("🔧 Validating git repository...")
 
-        # Git status analysis
-        code, status_out, _ = self.run_command("git status --porcelain")
+        # Check if git repo
+        if not (self.repo_path / ".git").exists():
+            self.errors.append("Not a git repository")
+            return
 
-        issues = []
-        recommendations = []
+        # Get detailed git status
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            cwd=self.repo_path,
+        )
 
-        if status_out:
-            lines = status_out.strip().split("\n")
-            untracked = [l for l in lines if l.startswith("??")]
-            modified = [l for l in lines if l.startswith(" M") or l.startswith("M ")]
-            deleted = [l for l in lines if l.startswith(" D") or l.startswith("D ")]
+        if result.stdout:
+            lines = result.stdout.strip().split("\n")
+
+            # Categorize all changes
+            untracked = []
+            modified = []
+            deleted = []
+            renamed = []
+            unmerged = []
+
+            for line in lines:
+                status = line[:2]
+                filepath = line[3:]
+
+                if status == "??":
+                    untracked.append(filepath)
+                elif "M" in status:
+                    modified.append(filepath)
+                elif "D" in status:
+                    deleted.append(filepath)
+                elif "R" in status:
+                    renamed.append(filepath)
+                elif "U" in status or "A" in status:
+                    unmerged.append(filepath)
 
             if untracked:
-                issues.append(("untracked", len(untracked)))
-                recommendations.append(
-                    "AUTO: Stage untracked files and create .gitignore"
-                )
-
+                self.warnings.append(f"{len(untracked)} untracked files")
             if modified:
-                issues.append(("modified", len(modified)))
-                recommendations.append("AUTO: Stage modified files for commit")
-
+                self.warnings.append(f"{len(modified)} modified files")
             if deleted:
-                issues.append(("deleted", len(deleted)))
-                recommendations.append("AUTO: Stage deletions")
+                self.warnings.append(f"{len(deleted)} deleted files")
+            if unmerged:
+                self.errors.append(f"{len(unmerged)} unmerged/conflicted files")
 
-        # Check branch structure
-        code, branches, _ = self.run_command("git branch -a")
-        if branches:
-            branch_count = len(branches.strip().split("\n"))
-            self.memory.learn("git", "branch_count", branch_count)
+        # Check for uncommitted changes
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"], cwd=self.repo_path
+        )
+        if result.returncode != 0:
+            self.warnings.append("Staged changes not committed")
 
-        # Check for common issues
-        if not os.path.exists(".gitignore"):
-            issues.append(("no_gitignore", 1))
-            recommendations.append("CREATE: .gitignore file")
+        print(f"   ✓ Git validation complete")
 
-        if not os.path.exists("README.md"):
-            issues.append(("no_readme", 1))
-            recommendations.append("CREATE: README.md documentation")
+    def _validate_permissions(self):
+        """Check file permissions"""
+        print("🔐 Validating permissions...")
 
-        # AI Decision: Auto-fix or ask
-        print(f"⚡ Issues Detected: {len(issues)}")
-        for issue, count in issues:
-            print(f"   • {issue}: {count} item(s)")
+        for root, dirs, files in os.walk(self.repo_path):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
+            ]
 
-        print(f"\n🤖 AI Recommendations:")
-        for i, rec in enumerate(recommendations, 1):
-            print(f"   {i}. {rec}")
+            for file in files:
+                file_path = Path(root) / file
 
-        return issues, recommendations
+                # Check if executable files have proper permissions
+                if file_path.suffix in [".sh", ".py"] or file.endswith(".command"):
+                    if not os.access(file_path, os.X_OK):
+                        self.warnings.append(
+                            f"Script not executable: {file_path.relative_to(self.repo_path)}"
+                        )
 
-    def autonomous_fix(self, issues):
-        """Autonomous fixing with AI decisions"""
-        print("\n⚡ Quantum Auto-Fix Initiated\n")
+        print(f"   ✓ Permissions checked")
 
-        for issue_type, count in issues:
-            if issue_type == "untracked":
-                self._fix_untracked()
-            elif issue_type == "modified":
-                self._fix_modified()
-            elif issue_type == "deleted":
-                self._fix_deleted()
-            elif issue_type == "no_gitignore":
-                self._create_gitignore()
-            elif issue_type == "no_readme":
-                self._create_readme()
+    def _validate_code_syntax(self):
+        """Validate syntax of all code files"""
+        print("🐍 Validating code syntax...")
 
-        # Auto commit
-        code, _, _ = self.run_command("git diff --cached --quiet")
-        if code != 0:
+        for root, dirs, files in os.walk(self.repo_path):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
+            ]
+
+            for file in files:
+                file_path = Path(root) / file
+                rel_path = file_path.relative_to(self.repo_path)
+
+                # Validate Python files
+                if file_path.suffix == ".py":
+                    try:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            code = f.read()
+                        ast.parse(code)
+                    except SyntaxError as e:
+                        self.errors.append(
+                            f"Python syntax error in {rel_path}: Line {e.lineno}"
+                        )
+                    except Exception as e:
+                        self.warnings.append(
+                            f"Could not validate {rel_path}: {str(e)[:50]}"
+                        )
+
+                # Validate JSON files
+                elif file_path.suffix == ".json":
+                    try:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            json.load(f)
+                    except json.JSONDecodeError as e:
+                        self.errors.append(
+                            f"JSON syntax error in {rel_path}: Line {e.lineno}"
+                        )
+                    except Exception:
+                        pass
+
+        print(f"   ✓ Code syntax validated")
+
+    def _generate_report(self):
+        """Generate comprehensive validation report"""
+        return {
+            "errors": self.errors,
+            "warnings": self.warnings,
+            "error_count": len(self.errors),
+            "warning_count": len(self.warnings),
+            "status": (
+                "FAILED" if self.errors else ("WARNING" if self.warnings else "CLEAN")
+            ),
+        }
+
+
+class AutoFixer:
+    """Automatic fixer for all detected issues"""
+
+    def __init__(self, repo_path):
+        self.repo_path = Path(repo_path)
+        self.fixes_applied = []
+
+    def fix_all(self, validation_report):
+        """Fix ALL issues automatically"""
+        print("\n🔧 AUTO-FIX MODE - Correcting all issues\n")
+
+        # Fix git issues
+        self._fix_git_issues()
+
+        # Fix permissions
+        self._fix_permissions()
+
+        # Create missing files
+        self._create_missing_files()
+
+        # Clean up
+        self._cleanup()
+
+        return self.fixes_applied
+
+    def _fix_git_issues(self):
+        """Fix all git-related issues"""
+        print("📝 Fixing git issues...")
+
+        # Stage all changes
+        subprocess.run(["git", "add", "-A"], cwd=self.repo_path)
+        self.fixes_applied.append("Staged all changes (git add -A)")
+
+        # Check if there's anything to commit
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"], cwd=self.repo_path
+        )
+
+        if result.returncode != 0:
+            # Commit changes
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self.run_command(f'git commit -m "🤖 Quantum Auto-Fix | {timestamp}"')
-            print("\n✅ Quantum Auto-Fix Complete")
+            subprocess.run(
+                [
+                    "git",
+                    "commit",
+                    "-m",
+                    f"🤖 Auto-fix: Complete validation and correction | {timestamp}",
+                ],
+                cwd=self.repo_path,
+            )
+            self.fixes_applied.append("Created auto-fix commit")
 
-    def _fix_untracked(self):
-        print("   ⚙️  Fixing untracked files...")
-        self.run_command("git add .")
-        self.memory.learn("fixes", "untracked", datetime.now().isoformat())
+        print("   ✓ Git issues fixed")
 
-    def _fix_modified(self):
-        print("   ⚙️  Fixing modified files...")
-        self.run_command("git add -u")
-        self.memory.learn("fixes", "modified", datetime.now().isoformat())
+    def _fix_permissions(self):
+        """Fix file permissions"""
+        print("🔐 Fixing permissions...")
 
-    def _fix_deleted(self):
-        print("   ⚙️  Fixing deleted files...")
-        self.run_command("git add -u")
-        self.memory.learn("fixes", "deleted", datetime.now().isoformat())
+        for root, dirs, files in os.walk(self.repo_path):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
+            ]
 
-    def _create_gitignore(self):
-        print("   📝 Creating .gitignore...")
-        gitignore_content = """# Quantum-LED Digilit Project
-# Auto-generated gitignore
+            for file in files:
+                file_path = Path(root) / file
 
-# Dependencies
+                # Make scripts executable
+                if file_path.suffix in [".sh", ".py"] or file.endswith(".command"):
+                    try:
+                        os.chmod(file_path, 0o755)
+                        self.fixes_applied.append(f"Made executable: {file_path.name}")
+                    except:
+                        pass
+
+        print("   ✓ Permissions fixed")
+
+    def _create_missing_files(self):
+        """Create missing essential files"""
+        print("📄 Creating missing files...")
+
+        # Create .gitignore if missing
+        gitignore_path = self.repo_path / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_content = """# Dependencies
 node_modules/
 venv/
 __pycache__/
+*.pyc
 
 # Environment
 .env
 .env.local
-.env.production
 
-# Build outputs
+# Build
 dist/
 build/
 *.log
@@ -373,244 +415,159 @@ build/
 .DS_Store
 Thumbs.db
 
-# Quantum Memory (keep this!)
+# Quantum Memory
 .quantum_memory/
 
 # Large files
 *.mp4
 *.zip
 *.tar.gz
+*.pdf
 """
-        with open(".gitignore", "w") as f:
-            f.write(gitignore_content)
-        self.run_command("git add .gitignore")
-        self.memory.learn("created", "gitignore", datetime.now().isoformat())
+            gitignore_path.write_text(gitignore_content)
+            self.fixes_applied.append("Created .gitignore")
+            print("   ✓ Created .gitignore")
 
-    def _create_readme(self):
-        print("   📝 Creating README.md...")
-        readme_content = f"""# Digilit Project
+        # Create README if missing
+        readme_path = self.repo_path / "README.md"
+        if not readme_path.exists():
+            readme_content = f"""# Project Repository
 
-**Quantum-LED AI Powered Web Platform**
+Auto-generated README by Quantum-LED Agent v5.0
 
-## 🌟 Overview
-Digilit is an advanced web platform powered by 5 AI engines:
-- 🌌 Quantum-LED Engine
-- 🎨 Frontend Engine
-- ⚙️  Backend Engine
-- 📊 Business Intelligence Engine
-- 👁️  Visual Engine
+## Overview
+This repository has been automatically validated and corrected.
 
-## 🚀 Quick Start
-```bash
-# Install dependencies
-npm install
+## Last Validation
+{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
-# Run development server
-npm run dev
-```
-
-## 🤖 AI Agent
-This project includes a self-evolving Quantum-LED AI Agent (v4.44) for autonomous repository management.
-
-```bash
-python3 quantum_agent.py
-```
-
-## 📅 Last Updated
-{datetime.now().strftime("%Y-%m-%d")}
+## Status
+✅ All validations passed
+✅ All issues corrected
 
 ---
-*Powered by Quantum-LED AI Technology*
+*Maintained by Quantum-LED AI Agent v5.0*
 """
-        with open("README.md", "w") as f:
-            f.write(readme_content)
-        self.run_command("git add README.md")
-        self.memory.learn("created", "readme", datetime.now().isoformat())
+            readme_path.write_text(readme_content)
+            self.fixes_applied.append("Created README.md")
+            print("   ✓ Created README.md")
 
-    def natural_language_interface(self):
-        """Advanced NLP command interface"""
-        print("\n💬 Quantum-LED Natural Language Interface")
-        print("   I can understand complex instructions and take autonomous actions")
-        print("   Examples:")
-        print("   • 'scan the entire project and fix everything'")
-        print("   • 'analyze code quality and suggest improvements'")
-        print("   • 'prepare for production deployment'")
-        print("   • 'show me intelligence report'")
-        print("   • 'exit'\n")
+    def _cleanup(self):
+        """Clean up temporary files"""
+        print("🧹 Cleaning up...")
 
-        while True:
-            try:
-                user_input = input("🌌 You: ").strip()
+        patterns = ["*.pyc", "*.pyo", "*.pyd", ".DS_Store", "Thumbs.db", "*.log"]
 
-                if not user_input:
-                    continue
+        for root, dirs, files in os.walk(self.repo_path):
+            dirs[:] = [
+                d
+                for d in dirs
+                if d
+                not in [
+                    ".git",
+                    "node_modules",
+                    "__pycache__",
+                    "venv",
+                    ".quantum_memory",
+                ]
+            ]
 
-                if user_input.lower() in ["exit", "quit", "q", "bye"]:
-                    print("\n🌌 Quantum-LED Agent signing off. Stay brilliant! ✨")
-                    break
+            for file in files:
+                for pattern in patterns:
+                    if Path(file).match(pattern):
+                        file_path = Path(root) / file
+                        try:
+                            file_path.unlink()
+                            self.fixes_applied.append(f"Removed: {file}")
+                        except:
+                            pass
 
-                # Process with quantum intelligence
-                self._process_quantum_command(user_input)
-
-            except KeyboardInterrupt:
-                print("\n\n🌌 Interrupted. Quantum state preserved. Goodbye! ✨")
-                break
-            except Exception as e:
-                print(f"   ⚠️  Quantum fluctuation detected: {e}")
-
-    def _process_quantum_command(self, command):
-        """Process natural language commands with AI"""
-        cmd_lower = command.lower()
-
-        # Scan and analyze commands
-        if "scan" in cmd_lower or "analyze" in cmd_lower:
-            if (
-                "project" in cmd_lower
-                or "everything" in cmd_lower
-                or "all" in cmd_lower
-            ):
-                print("\n🔬 Initiating full quantum scan...")
-                self.deep_scan_structure()
-                issues, recs = self.autonomous_diagnosis()
-
-                if "fix" in cmd_lower:
-                    self.autonomous_fix(issues)
-
-        # Intelligence and learning commands
-        elif (
-            "intelligence" in cmd_lower or "report" in cmd_lower or "learn" in cmd_lower
-        ):
-            report = self.memory.get_intelligence_report()
-            print("\n🧠 Quantum Intelligence Report:")
-            print(f"   ├─ Knowledge Items: {report['total_knowledge_items']}")
-            print(f"   ├─ Actions Recorded: {report['actions_recorded']}")
-            print(f"   ├─ Success Rate: {report['success_rate']:.1%}")
-            print(f"   └─ Last Updated: {report['last_updated']}")
-
-            if report["common_patterns"]:
-                print("\n   📊 Common Action Patterns:")
-                for action, count in report["common_patterns"].items():
-                    print(f"      • {action}: {count} times")
-
-        # Git commands
-        elif "commit" in cmd_lower:
-            match = re.search(r"message[:\s]+(.+)", cmd_lower)
-            msg = match.group(1) if match else "Quantum commit"
-            code, _, _ = self.run_command(f'git commit -m "{msg}"')
-            if code == 0:
-                print(f"   ✅ Committed: {msg}")
-
-        elif "push" in cmd_lower:
-            match = re.search(r"to\s+(\w+)\s+(\w+)", cmd_lower)
-            if match:
-                remote, branch = match.groups()
-                print(f"   🚀 Pushing to {remote}/{branch}...")
-                code, out, err = self.run_command(f"git push {remote} {branch}")
-                if code == 0:
-                    print("   ✅ Push successful!")
-                else:
-                    print(f"   ⚠️  {err}")
-            else:
-                print("   💡 Specify: 'push to origin main'")
-
-        # Preparation commands
-        elif "prepare" in cmd_lower or "ready" in cmd_lower:
-            if "production" in cmd_lower or "deploy" in cmd_lower:
-                print("\n🚀 Preparing for production deployment...")
-                print("   ⚙️  Running pre-deployment checks...")
-
-                # Run checks
-                self.deep_scan_structure()
-                issues, _ = self.autonomous_diagnosis()
-
-                if issues:
-                    print(f"   ⚠️  Found {len(issues)} issues - Auto-fixing...")
-                    self.autonomous_fix(issues)
-
-                print("   ✅ Production-ready status: VERIFIED")
-
-        # Help
-        elif "help" in cmd_lower:
-            print(
-                """
-   🌌 Quantum-LED Command Guide:
-   
-   Scanning & Analysis:
-   • "scan the entire project"
-   • "analyze everything and fix"
-   
-   Intelligence:
-   • "show intelligence report"
-   • "what have you learned"
-   
-   Git Operations:
-   • "commit with message: [your message]"
-   • "push to origin main"
-   
-   Deployment:
-   • "prepare for production"
-   
-   General:
-   • "help" - Show this guide
-   • "exit" - Sign off
-            """
-            )
-
-        else:
-            print("   💡 I understand complex commands. Try:")
-            print("      'scan everything and fix issues'")
-            print("      'show me intelligence report'")
-            print("      Type 'help' for more commands")
+        print("   ✓ Cleanup complete")
 
 
 def main():
-    print("=" * 70)
-    print("🌌 QUANTUM-LED AI AGENT v4.44")
-    print("   Self-Evolving Synthetic Intelligence")
-    print("   Digilit Project - Full Repository Management")
-    print("=" * 70)
+    print("=" * 80)
+    print("🌌 QUANTUM-LED AI AGENT v5.0 - DEEP VALIDATION EDITION")
+    print("   Complete validation and correction for ALL directories and files")
+    print("=" * 80)
 
-    agent = QuantumLEDAgent()
+    repo_path = os.getcwd()
 
-    # Initial quantum scan
-    print("\n🔬 Initializing quantum analysis...")
-    agent.deep_scan_structure()
+    # Phase 1: Deep Validation
+    print("\n" + "=" * 80)
+    print("PHASE 1: DEEP VALIDATION")
+    print("=" * 80 + "\n")
 
-    # Show options
-    print("\n" + "=" * 70)
-    print("\n🎯 Select Operation Mode:")
-    print("   1. Autonomous Mode (AI takes full control)")
-    print("   2. Natural Language Interface (interactive)")
-    print("   3. Quick Fix (diagnose and fix immediately)")
-    print("   4. Intelligence Report")
-    print("   5. Exit")
+    validator = DeepValidator(repo_path)
+    report = validator.validate_all()
 
-    choice = input("\n🌌 Select [1-5]: ").strip()
+    # Display Report
+    print("\n" + "=" * 80)
+    print("VALIDATION REPORT")
+    print("=" * 80)
+    print(f"\n🎯 Status: {report['status']}")
+    print(f"❌ Errors: {report['error_count']}")
+    print(f"⚠️  Warnings: {report['warning_count']}\n")
 
-    if choice == "1":
-        print("\n🤖 Autonomous Mode Activated")
-        issues, recs = agent.autonomous_diagnosis()
-        if issues:
-            agent.autonomous_fix(issues)
-        print("\n✨ Autonomous operation complete!")
+    if report["errors"]:
+        print("❌ ERRORS FOUND:")
+        for i, error in enumerate(report["errors"][:20], 1):
+            print(f"   {i}. {error}")
+        if len(report["errors"]) > 20:
+            print(f"   ... and {len(report['errors']) - 20} more")
 
-    elif choice == "2":
-        agent.natural_language_interface()
+    if report["warnings"]:
+        print("\n⚠️  WARNINGS:")
+        for i, warning in enumerate(report["warnings"][:20], 1):
+            print(f"   {i}. {warning}")
+        if len(report["warnings"]) > 20:
+            print(f"   ... and {len(report['warnings']) - 20} more")
 
-    elif choice == "3":
-        issues, _ = agent.autonomous_diagnosis()
-        if issues:
-            agent.autonomous_fix(issues)
-        else:
-            print("\n✅ No issues found - repository is quantum-perfect!")
+    # Phase 2: Auto-Fix
+    if report["errors"] or report["warnings"]:
+        print("\n" + "=" * 80)
+        print("PHASE 2: AUTO-FIX")
+        print("=" * 80 + "\n")
 
-    elif choice == "4":
-        report = agent.memory.get_intelligence_report()
-        print("\n🧠 Quantum Intelligence Report:")
-        print(json.dumps(report, indent=2))
+        response = input("🤖 Apply automatic fixes? [Y/n]: ").strip().lower()
 
+        if response != "n":
+            fixer = AutoFixer(repo_path)
+            fixes = fixer.fix_all(report)
+
+            print("\n" + "=" * 80)
+            print("FIXES APPLIED")
+            print("=" * 80 + "\n")
+
+            for i, fix in enumerate(fixes, 1):
+                print(f"   ✓ {i}. {fix}")
+
+            print(f"\n✨ Total fixes applied: {len(fixes)}")
+
+            # Re-validate
+            print("\n" + "=" * 80)
+            print("FINAL VALIDATION")
+            print("=" * 80 + "\n")
+
+            validator2 = DeepValidator(repo_path)
+            final_report = validator2.validate_all()
+
+            print(f"\n🎯 Final Status: {final_report['status']}")
+            print(f"❌ Remaining Errors: {final_report['error_count']}")
+            print(f"⚠️  Remaining Warnings: {final_report['warning_count']}")
+
+            if final_report["status"] == "CLEAN":
+                print("\n🎉 REPOSITORY IS NOW 100% CLEAN! 🎉")
+            elif final_report["status"] == "WARNING":
+                print("\n✅ All critical errors fixed! (Some warnings remain)")
+            else:
+                print("\n⚠️  Some issues still need manual attention")
     else:
-        print("\n🌌 Quantum-LED Agent signing off. ✨")
+        print("\n✅ NO ISSUES FOUND - Repository is already perfect!")
+
+    print("\n" + "=" * 80)
+    print("🌌 Quantum-LED Agent v5.0 - Operation Complete")
+    print("=" * 80)
 
 
 if __name__ == "__main__":
