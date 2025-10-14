@@ -230,7 +230,7 @@ echo "=================================================="
 
 # Test npm start one more time
 log "Final test - can we run npm start?"
-if timeout 10s npm start & then sleep 3 && curl -f http://localhost:3000/ > /dev/null 2>&1; then
+if timeout 10s npm start & ; sleep 3 && curl -f http://localhost:3000/ > /dev/null 2>&1; then
     success "🎉 ULTIMATE SUCCESS! Repository is now working properly!"
     success "You can now run: npm start"
 else
