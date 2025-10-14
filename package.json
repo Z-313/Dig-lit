@@ -10,7 +10,7 @@
     "python": ">=3.9.0"
   },
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
     "dev:web": "cd modules/frontend/apps/web/diglit-web && npm run dev",
     "dev:admin": "cd modules/frontend/apps/admin && npm run dev",
     "dev:api": "cd modules/backend && python -m uvicorn apps.api.main:app --reload --host 0.0.0.0 --port 8000",
