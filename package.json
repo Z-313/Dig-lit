@@ -10,7 +10,7 @@
     "python": ">=3.9.0"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:admin\"",
+    "dev": "nodemon index.js",
     "dev:web": "cd modules/frontend/apps/web/diglit-web && npm run dev",
     "dev:admin": "cd modules/frontend/apps/admin && npm run dev",
     "dev:api": "cd modules/backend && python -m uvicorn apps.api.main:app --reload --host 0.0.0.0 --port 8000",
@@ -89,7 +89,8 @@
     "release:alpha": "standard-version --prerelease alpha",
     "ci:test": "npm run test:coverage && npm run build && npm run bundle:size:ci",
     "ci:security": "npm audit --audit-level moderate && npm run type-check",
-    "ci:full": "npm run ci:security && npm run ci:test"
+    "ci:full": "npm run ci:security && npm run ci:test",
+    "start": "node index.js"
   },
   "dependencies": {
     "next": "14.2.33",
@@ -113,6 +114,7 @@
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
+    "jest": "30.2.0",
     "lint-staged": "^16.2.3",
     "prettier": "^3.0.0",
     "rimraf": "^5.0.10",
